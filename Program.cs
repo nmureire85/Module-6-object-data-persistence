@@ -1,4 +1,6 @@
-﻿namespace quiz_maker;
+﻿using System.Xml.Serialization;
+
+namespace quiz_maker;
 
 class Program
 {
@@ -63,5 +65,13 @@ class Program
             Console.WriteLine();
         }
 
+        
+        XmlSerializer serializer = new XmlSerializer(typeof(Quiz)); 
+        var path = @"/Users/nelsonmureire/Documents/xmlresult/quiz.xml";
+        using (FileStream file = File.Create(path))
+        {
+            serializer.Serialize(file, quiz);
+        } 
+        
     }
 }
