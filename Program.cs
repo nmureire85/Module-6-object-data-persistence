@@ -17,124 +17,56 @@ class Program
         while (addAnotherQuestion)
         {
             Question question = new Question();
-
-            Console.WriteLine("Enter a question:");
-            question.Text = Console.ReadLine();
-
+            question.Text = UIMethods.GetQuestion();
             question.Answers = new List<Answer>();
-
-            Console.WriteLine("How many answers would you like?");
-            int numberOfAnswers;
-            while (!int.TryParse(Console.ReadLine(), out numberOfAnswers))
-            {
-                Console.WriteLine("Please enter a valid number.");
-            }
+            int numberOfAnswers = Convert.ToInt32(UIMethods.GetNumberOfAnswers());
 
             for (int i = 0; i < numberOfAnswers; i++)
             {
                 Answer answer = new Answer();
+                answer.Text = UIMethods.GetAnAnswer();
 
-                Console.WriteLine("Enter an answer:");
-                answer.Text = Console.ReadLine();
-
-                Console.WriteLine("Is this answer correct? (y/n)");
-                string correctAnswer = Console.ReadLine();
+                string correctAnswer = UIMethods.GetCorrectAnswerYesorNo();
 
                 answer.IsCorrect = correctAnswer == "y";
 
                 question.Answers.Add(answer);
-                Console.WriteLine("Answer is correct? (y/n)");
             }
 
             quiz.Questions.Add(question);
 
-            Console.WriteLine("Do you want to add another question? (y/n)");
-            string anotherQuestion = Console.ReadLine();
+
+            string anotherQuestion = UIMethods.GetAnotherQuestion();
 
             addAnotherQuestion = anotherQuestion == "y";
         }
 
-        foreach (Question question in quiz.Questions)
-        {
-            Console.WriteLine(question.Text);
-
-            int answerNumber = 1;
-
-            foreach (Answer answer in question.Answers)
-            {
-                Console.WriteLine($"{answerNumber}. {answer.Text}");
-                answerNumber++;
-            }
-
-            Console.WriteLine();
-        }
-
-
-        XmlSerializer serializer = new XmlSerializer(typeof(Quiz));
-        string relativePath = @"../../../quiz.text";
-        using (FileStream file = File.Create(relativePath))
-        {
-            serializer.Serialize(file, quiz);
-        }
-
-
-        using (FileStream file = File.OpenRead(relativePath))
-        {
-            quiz = (Quiz)serializer.Deserialize(file)!;
-        }
-
+        string relativePath = @"../../../quiz.xml";
+        QuizFileManager.SaveQuiz(quiz, relativePath);
+        quiz = QuizFileManager.LoadQuiz(relativePath);
         List<Question> questionsToPlay = new List<Question>(quiz.Questions);
         while (questionsToPlay.Count > 0)
         {
-            Answer answer = new Answer();
             int questionIndex = random.Next(questionsToPlay.Count);
 
             Question question = questionsToPlay[questionIndex];
-
             questionsToPlay.RemoveAt(questionIndex);
-            // Display the question
-            Console.WriteLine();
-            Console.WriteLine(question.Text);
-            // Display answers here
-            for (int i = 0; i < question.Answers.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {question.Answers[i].Text}");
-            }
-
-            // Get user's answer here
-            Console.Write("Choose your answer: ");
-
-            int answerChoice;
-            while (!int.TryParse(Console.ReadLine(), out answerChoice) ||
-                   answerChoice < 1 ||
-                   answerChoice > question.Answers.Count)
-            {
-                Console.WriteLine("Invalid choice. Please enter a valid answer number.");
-                Console.Write("Choose your answer: ");
-            }
-
-            // Get the selected answer from the list
+            UIMethods.DisplayQuestionAndAnswers(question);
+            int answerChoice = UIMethods.GetAnswerChoice(question.Answers.Count);
             Answer selectedAnswer = question.Answers[answerChoice - 1];
-
-            // Check if answer is correct
             if (selectedAnswer.IsCorrect)
             {
-                Console.WriteLine("Correct!");
-
-                // score++ if correct
+                UIMethods.PrintAnswerIsCorrect();
                 score++;
             }
             else
             {
-                Console.WriteLine("Incorrect!");
+                UIMethods.PrintAnswerIsIncorrect();
             }
 
-            Console.WriteLine($"Current score: {score}");
+            UIMethods.PrintScore(score);
         }
 
-        // Display final score
-        Console.WriteLine();
-        Console.WriteLine("Quiz completed!");
-        Console.WriteLine($"Your final score is {score}/{quiz.Questions.Count}");
+        UIMethods.DisplayFinalScore(score, quiz);
     }
 }
