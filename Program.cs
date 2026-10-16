@@ -4,6 +4,9 @@ namespace quiz_maker;
 
 class Program
 {
+    const int MODE_ONE = 1;
+    const int MODE_TWO = 2;
+
     static void Main(string[] args)
     {
         Quiz quiz = new Quiz();
@@ -14,59 +17,27 @@ class Program
 
         bool addAnotherQuestion = true;
 
-        while (addAnotherQuestion)
+        Console.WriteLine("###### Let the games begin! ######");
+        Console.WriteLine("Choose a mode:");
+        Console.WriteLine("1 - Create a quiz");
+        Console.WriteLine("2 - Play a quiz");
+
+
+        int mode = int.Parse(Console.ReadLine());
+
+        if (mode <MODE_ONE || mode > MODE_TWO)
         {
-            Question question = new Question();
-            question.Text = UIMethods.GetQuestion();
-            question.Answers = new List<Answer>();
-            int numberOfAnswers = Convert.ToInt32(UIMethods.GetNumberOfAnswers());
-
-            for (int i = 0; i < numberOfAnswers; i++)
-            {
-                Answer answer = new Answer();
-                answer.Text = UIMethods.GetAnAnswer();
-
-                string correctAnswer = UIMethods.GetCorrectAnswerYesorNo();
-
-                answer.IsCorrect = correctAnswer == "y";
-
-                question.Answers.Add(answer);
-            }
-
-            quiz.Questions.Add(question);
-
-
-            string anotherQuestion = UIMethods.GetAnotherQuestion();
-
-            addAnotherQuestion = anotherQuestion == "y";
+            return;
         }
 
-        string relativePath = @"../../../quiz.xml";
-        QuizFileManager.SaveQuiz(quiz, relativePath);
-        quiz = QuizFileManager.LoadQuiz(relativePath);
-        List<Question> questionsToPlay = new List<Question>(quiz.Questions);
-        while (questionsToPlay.Count > 0)
+        if (MODE_ONE == mode)
         {
-            int questionIndex = random.Next(questionsToPlay.Count);
-
-            Question question = questionsToPlay[questionIndex];
-            questionsToPlay.RemoveAt(questionIndex);
-            UIMethods.DisplayQuestionAndAnswers(question);
-            int answerChoice = UIMethods.GetAnswerChoice(question.Answers.Count);
-            Answer selectedAnswer = question.Answers[answerChoice - 1];
-            if (selectedAnswer.IsCorrect)
-            {
-                UIMethods.PrintAnswerIsCorrect();
-                score++;
-            }
-            else
-            {
-                UIMethods.PrintAnswerIsIncorrect();
-            }
-
-            UIMethods.PrintScore(score);
+            GameMode.CreatQuiz(addAnotherQuestion, quiz);
         }
 
-        UIMethods.DisplayFinalScore(score, quiz);
+        if (MODE_TWO == mode)
+        {
+            GameMode.PlayQuiz(score, quiz, random);
+        }
     }
 }

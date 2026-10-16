@@ -4,19 +4,20 @@ namespace quiz_maker;
 
 public class QuizFileManager
 {
+    const string RELATIVE_PATH = @"../../../quiz.xml";
     static XmlSerializer serializer = new XmlSerializer(typeof(Quiz));
 
-    public static void SaveQuiz(Quiz quiz, String path)
+    public static void SaveQuiz(Quiz quiz)
     {
-        using (FileStream file = File.Create(path))
+        using (FileStream file = File.Create(RELATIVE_PATH))
         {
             serializer.Serialize(file, quiz);
         }
     }
 
-    public static Quiz LoadQuiz(string path)
+    public static Quiz LoadQuiz()
     {
-        using (FileStream file = File.OpenRead(path))
+        using (FileStream file = File.OpenRead(RELATIVE_PATH))
         {
             Quiz quiz = (Quiz)serializer.Deserialize(file)!;
             return quiz;
